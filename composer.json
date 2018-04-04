@@ -1,0 +1,23 @@
+{
+  "name": "codeages/biz-security",
+  "description": "security module",
+  "type": "library",
+  "require": {
+    "codeages/biz-framework": "^0.9"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Codeages\\Biz\\User\\": "src/User/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "mockery/mockery": "^0.9.9",
+    "phpunit/phpunit": "4.8.36"
+  }
+}
