@@ -8,12 +8,13 @@ use Codeages\Biz\Framework\Service\BaseService;
 
 class UserServiceImpl extends BaseService implements UserService
 {
-    public function register($user)
+    public function register($user, $bind = array())
     {
         $unregistedUser = ArrayToolkit::parts($user, array('username', 'mobile', 'email', 'nickname', 'password', 'created_ip', 'created_source'));
 
         $unregistedUser = $this->fillLoginName($unregistedUser);
         $unregistedUser = $this->fillPassword($unregistedUser);
+        $unregistedUser = $this->fillNickname($unregistedUser);
         return $this->swapUser($this->getUserDao()->create($unregistedUser));
     }
 
@@ -24,18 +25,28 @@ class UserServiceImpl extends BaseService implements UserService
         return $user;
     }
 
+    protected function fillNickname($unregistedUser)
+    {
+        if (empty($unregistedUser['nickname'])) {
+            $unregistedUser['nickname'] = $this->randomStr(10);
+        }
+        return $unregistedUser;
+    }
+
     protected function fillLoginName($unregistedUser)
     {
         $userOptions = $this->biz['user.options'];
         $registerType = $userOptions['register_type'];
-        $registerTypes = array('username', 'mobile', 'email', 'nickname');
+        $registerTypes = array('username', 'mobile', 'email');
         if (!ArrayToolkit::requireds($unregistedUser, array($registerType))) {
             throw $this->createInvalidArgumentException($registerType.' is required.');
         }
 
         $registerTypes = array_diff($registerTypes, array($registerType));
         foreach ($registerTypes as $fillField) {
-            $unregistedUser[$fillField] = $this->randomStr(10);
+            if (empty($unregistedUser[$fillField])) {
+                $unregistedUser[$fillField] = $this->randomStr(10);
+            }
         }
 
         return $unregistedUser;
@@ -63,7 +74,7 @@ class UserServiceImpl extends BaseService implements UserService
         return $str;
     }
 
-    public function changePassword($user)
+    public function changePassword($userId, $newPassword, $oldPassword)
     {
         // TODO: Implement changePassword() method.
     }

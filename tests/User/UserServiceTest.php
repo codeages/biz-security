@@ -50,9 +50,16 @@ class UserServiceTest extends IntegrationTestCase
         }
     }
 
+    public function testCreateUserWithBindType()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
 
+        $savedUser = $this->getUserService()->register($user, $userBind);
+        $this->expectedUser($user, $savedUser);
+    }
 
-    protected function expectedUser($expectedUser, $actualUser)
+    protected function expectedUser($expectedUser, $actualUser, $unAssertKeys = array())
     {
         foreach (array('username', 'nickname', 'email', 'mobile', 'created_user_id', 'created_ip', 'created_source') as $key) {
             $this->assertArrayHasKey($key, $actualUser);
@@ -62,10 +69,20 @@ class UserServiceTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('salt', $actualUser);
 
         foreach (array_keys($expectedUser) as $key) {
-            if ($key != 'password') {
+            if ($key != 'password' && (!empty($unAssertKeys) && !in_array($key, $unAssertKeys))) {
                 $this->assertEquals($expectedUser[$key], $actualUser[$key]);
             }
         }
+    }
+
+    protected function mockUserBind()
+    {
+        return array(
+            'type' => 'wechat_app',
+            'type_alias' => 'wechat',
+            'bind_id' => '12345',
+            'bind_ext' => '23456333',
+        );
     }
 
     protected function mockUser()

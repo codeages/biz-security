@@ -4,9 +4,14 @@ namespace Codeages\Biz\User\Service;
 
 interface UserService
 {
-    public function register($user);
+    /**
+     * 1、频率限制
+     * @param $user
+     * @return mixed
+     */
+    public function register($user, $bind = array());
 
-    public function changePassword($user);
+    public function changePassword($userId, $newPassword, $oldPassword);
 
     public function login($username, $password);
 
