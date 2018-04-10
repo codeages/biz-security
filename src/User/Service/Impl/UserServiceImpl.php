@@ -2,6 +2,7 @@
 
 namespace Codeages\Biz\User\Service\Impl;
 
+use Codeages\Biz\Framework\Service\Exception\ServiceException;
 use Codeages\Biz\Framework\Util\ArrayToolkit;
 use Codeages\Biz\User\Service\UserService;
 use Codeages\Biz\Framework\Service\BaseService;
@@ -23,9 +24,15 @@ class UserServiceImpl extends BaseService implements UserService
 
         $registedUser = array();
 
-        $this->biz['lock']->get('user_register');
+        $lockKey = 'user_register.'.$unregistedUser['login_name'];
+        $this->biz['lock']->get($lockKey);
         try {
             $this->beginTransaction();
+
+            $existUser = $this->getRegisterStrategy()->loadUserByLoginName($unregistedUser['login_name']);
+            if (!empty($existUser)) {
+                throw $this->createInvalidArgumentException('user is exist.');
+            }
 
             $unregistedUser = $this->fillPassword($unregistedUser);
             $unregistedUser = $this->fillLoginName($unregistedUser);
@@ -36,11 +43,10 @@ class UserServiceImpl extends BaseService implements UserService
                 $registedUser['bind'] = $bindUser;
             }
             $this->commit();
-        } catch (\Exception $e) {
+        } catch (ServiceException $e) {
             $this->rollback();
-            var_dump($e->getMessage());
         }
-        $this->biz['lock']->release('user_register');
+        $this->biz['lock']->release($lockKey);
 
         $wrappedUser = $this->wrapUser($registedUser);
         $this->dispatch('user.register', $wrappedUser);
@@ -63,18 +69,19 @@ class UserServiceImpl extends BaseService implements UserService
 
     protected function fillLoginName($unregistedUser)
     {
-        $userOptions = $this->biz['user.options'];
-        $registerMode = $userOptions['register_mode'];
-
-        $registerStrategy = $this->biz['user_register_mode.'.$registerMode];
+        $registerStrategy = $this->getRegisterStrategy();
         $unregistedUser = $registerStrategy->fillUnRegisterUser($unregistedUser);
-
-        if (!ArrayToolkit::requireds($unregistedUser, array($registerMode))) {
-            throw $this->createInvalidArgumentException($registerMode.' is required.');
-        }
 
         unset($unregistedUser['login_name']);
         return $unregistedUser;
+    }
+
+    protected function getRegisterStrategy()
+    {
+        $userOptions = $this->biz['user.options'];
+        $registerMode = $userOptions['register_mode'];
+
+        return $this->biz['user_register_mode.'.$registerMode];
     }
 
     protected function fillPassword($unregistedUser)

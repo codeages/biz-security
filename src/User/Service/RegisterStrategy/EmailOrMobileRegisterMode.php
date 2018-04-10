@@ -2,11 +2,16 @@
 
 namespace Codeages\Biz\User\Service\RegisterStrategy;
 
-class EmailOrMobileRegister extends AbstractRegister
+class EmailOrMobileRegisterMode extends AbstractRegisterMode
 {
     public function fillUnRegisterUser($unregistedUser)
     {
         $unregistedUser['email'] = $unregistedUser['login_name'];
         return $unregistedUser;
+    }
+
+    public function loadUserByLoginName($loginName)
+    {
+
     }
 }

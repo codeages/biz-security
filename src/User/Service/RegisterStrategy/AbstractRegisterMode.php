@@ -2,7 +2,7 @@
 
 namespace Codeages\Biz\User\Service\RegisterStrategy;
 
-abstract class AbstractRegister
+abstract class AbstractRegisterMode
 {
     protected $biz;
 
@@ -21,6 +21,13 @@ abstract class AbstractRegister
         }
         return $str;
     }
+
+    protected function getUserDao()
+    {
+        return $this->biz->dao('User:UserDao');
+    }
+
+    abstract public function loadUserByLoginName($loginName);
 
     abstract public function fillUnRegisterUser($unregistedUser);
 }

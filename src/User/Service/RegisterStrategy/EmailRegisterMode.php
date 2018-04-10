@@ -2,7 +2,7 @@
 
 namespace Codeages\Biz\User\Service\RegisterStrategy;
 
-class EmailRegister extends AbstractRegister
+class EmailRegisterMode extends AbstractRegisterMode
 {
     public function fillUnRegisterUser($unregistedUser)
     {
@@ -12,5 +12,10 @@ class EmailRegister extends AbstractRegister
         $unregistedUser['username'] = $unregistedUser['login_name'];
         $unregistedUser['mobile'] = $unregistedUser['login_name'];
         return $unregistedUser;
+    }
+
+    public function loadUserByLoginName($loginName)
+    {
+        return $this->getUserDao()->getByEmail($loginName);
     }
 }

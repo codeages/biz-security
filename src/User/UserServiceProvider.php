@@ -2,10 +2,10 @@
 
 namespace Codeages\Biz\User;
 
-use Codeages\Biz\User\Service\RegisterStrategy\EmailOrMobileRegister;
-use Codeages\Biz\User\Service\RegisterStrategy\EmailRegister;
-use Codeages\Biz\User\Service\RegisterStrategy\MobileRegister;
-use Codeages\Biz\User\Service\RegisterStrategy\UsernameRegister;
+use Codeages\Biz\User\Service\RegisterStrategy\EmailOrMobileRegisterMode;
+use Codeages\Biz\User\Service\RegisterStrategy\EmailRegisterMode;
+use Codeages\Biz\User\Service\RegisterStrategy\MobileRegisterMode;
+use Codeages\Biz\User\Service\RegisterStrategy\UsernameRegisterMode;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -30,10 +30,10 @@ class UserServiceProvider implements ServiceProviderInterface
         });
 
         $registerModes = array(
-            'email' => EmailRegister::class,
-            'mobile' => MobileRegister::class,
-            'username' => UsernameRegister::class,
-            'email_or_mobile' => EmailOrMobileRegister::class,
+            'email' => EmailRegisterMode::class,
+            'mobile' => MobileRegisterMode::class,
+            'username' => UsernameRegisterMode::class,
+            'email_or_mobile' => EmailOrMobileRegisterMode::class,
         );
 
         $modeKeys = array_keys($registerModes);
