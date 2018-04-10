@@ -12,10 +12,34 @@ class UserServiceImpl extends BaseService implements UserService
     {
         $unregistedUser = ArrayToolkit::parts($user, array('username', 'mobile', 'email', 'nickname', 'password', 'created_ip', 'created_source'));
 
+        if (!empty($bind) && !ArrayToolkit::requireds($bind, array('type', 'type_alias', 'bind_id'))) {
+            throw $this->createInvalidArgumentException('user bind args is invalid.');
+        }
+
         $unregistedUser = $this->fillLoginName($unregistedUser);
         $unregistedUser = $this->fillPassword($unregistedUser);
         $unregistedUser = $this->fillNickname($unregistedUser);
-        return $this->swapUser($this->getUserDao()->create($unregistedUser));
+
+        $registedUser = array();
+        try {
+            $this->beginTransaction();
+            $registedUser = $this->getUserDao()->create($unregistedUser);
+            if (!empty($bind)) {
+                $bindUser = $this->bindUser($registedUser, $bind);
+                $registedUser['bind'] = $bindUser;
+            }
+            $this->commit();
+        } catch (\Exception $e) {
+            $this->rollback();
+        }
+
+        return $this->swapUser($registedUser);
+    }
+
+    protected function bindUser($registedUser, $bind)
+    {
+        $bind['user_id'] = $registedUser['id'];
+        return $this->getUserBindDao()->create($bind);
     }
 
     protected function swapUser($user)
@@ -107,5 +131,10 @@ class UserServiceImpl extends BaseService implements UserService
     protected function getUserDao()
     {
         return $this->biz->dao('User:UserDao');
+    }
+
+    protected function getUserBindDao()
+    {
+        return $this->biz->dao('User:UserBindDao');
     }
 }

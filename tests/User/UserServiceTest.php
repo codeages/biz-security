@@ -57,6 +57,22 @@ class UserServiceTest extends IntegrationTestCase
 
         $savedUser = $this->getUserService()->register($user, $userBind);
         $this->expectedUser($user, $savedUser);
+        $this->expectedUserBind($userBind, $user['bind']);
+    }
+
+    protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
+    {
+        foreach (array('type', 'type_alias', 'bind_id') as $key) {
+            $this->assertArrayHasKey($key, $actualBind);
+        }
+
+        $this->assertArrayHasKey('user_id', $actualBind);
+
+        foreach (array_keys($expectedBind) as $key) {
+            if (!empty($unAssertKeys) && !in_array($key, $unAssertKeys)) {
+                $this->assertEquals($expectedBind, $actualBind);
+            }
+        }
     }
 
     protected function expectedUser($expectedUser, $actualUser, $unAssertKeys = array())

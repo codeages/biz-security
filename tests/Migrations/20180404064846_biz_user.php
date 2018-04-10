@@ -12,7 +12,6 @@ class BizUser extends Migration
         $biz = $this->getContainer();
         $connection = $biz['db'];
 
-
         $connection->exec("
           CREATE TABLE `biz_security_user` (
             `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,

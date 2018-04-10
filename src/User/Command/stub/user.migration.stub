@@ -33,6 +33,20 @@ class BizUser extends Migration
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
 
+        $connection->exec("
+          CREATE TABLE `biz_security_user_bind` (
+            `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
+            `user_id` INT(10) unsigned NOT NULL COMMENT '用户id',
+            `type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '绑定的第三方类型',
+            `type_alias` VARCHAR(32) NOT NULL COMMENT '第三方类型别名',
+            `bind_id` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '绑定的第三方id',
+            `bind_ext` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '绑定的第三方扩展信息',
+            `created_time` INT(10) unsigned NOT NULL DEFAULT '0',
+            `updated_time` INT(10) unsigned NOT NULL DEFAULT '0',
+            PRIMARY KEY (`id`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
+
     }
 
     protected function isFieldExist($table, $filedName)
