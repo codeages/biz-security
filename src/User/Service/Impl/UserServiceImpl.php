@@ -10,19 +10,26 @@ class UserServiceImpl extends BaseService implements UserService
 {
     public function register($user, $bind = array())
     {
-        $unregistedUser = ArrayToolkit::parts($user, array('username', 'mobile', 'email', 'nickname', 'password', 'created_ip', 'created_source'));
+        $userFields = array('login_name', 'password', 'created_ip', 'created_source');
+        $unregistedUser = ArrayToolkit::parts($user, $userFields);
+
+        if (!ArrayToolkit::requireds($unregistedUser, $userFields)) {
+            throw $this->createInvalidArgumentException('user args is invalid.');
+        }
 
         if (!empty($bind) && !ArrayToolkit::requireds($bind, array('type', 'type_alias', 'bind_id'))) {
             throw $this->createInvalidArgumentException('user bind args is invalid.');
         }
 
-        $unregistedUser = $this->fillLoginName($unregistedUser);
-        $unregistedUser = $this->fillPassword($unregistedUser);
-        $unregistedUser = $this->fillNickname($unregistedUser);
-
         $registedUser = array();
+
+        $this->biz['lock']->get('user_register');
         try {
             $this->beginTransaction();
+
+            $unregistedUser = $this->fillPassword($unregistedUser);
+            $unregistedUser = $this->fillLoginName($unregistedUser);
+
             $registedUser = $this->getUserDao()->create($unregistedUser);
             if (!empty($bind)) {
                 $bindUser = $this->bindUser($registedUser, $bind);
@@ -31,9 +38,14 @@ class UserServiceImpl extends BaseService implements UserService
             $this->commit();
         } catch (\Exception $e) {
             $this->rollback();
+            var_dump($e->getMessage());
         }
+        $this->biz['lock']->release('user_register');
 
-        return $this->swapUser($registedUser);
+        $wrappedUser = $this->wrapUser($registedUser);
+        $this->dispatch('user.register', $wrappedUser);
+
+        return $wrappedUser;
     }
 
     protected function bindUser($registedUser, $bind)
@@ -42,37 +54,26 @@ class UserServiceImpl extends BaseService implements UserService
         return $this->getUserBindDao()->create($bind);
     }
 
-    protected function swapUser($user)
+    protected function wrapUser($user)
     {
         unset($user['password']);
         unset($user['salt']);
         return $user;
     }
 
-    protected function fillNickname($unregistedUser)
-    {
-        if (empty($unregistedUser['nickname'])) {
-            $unregistedUser['nickname'] = $this->randomStr(10);
-        }
-        return $unregistedUser;
-    }
-
     protected function fillLoginName($unregistedUser)
     {
         $userOptions = $this->biz['user.options'];
-        $registerType = $userOptions['register_type'];
-        $registerTypes = array('username', 'mobile', 'email');
-        if (!ArrayToolkit::requireds($unregistedUser, array($registerType))) {
-            throw $this->createInvalidArgumentException($registerType.' is required.');
+        $registerMode = $userOptions['register_mode'];
+
+        $registerStrategy = $this->biz['user_register_mode.'.$registerMode];
+        $unregistedUser = $registerStrategy->fillUnRegisterUser($unregistedUser);
+
+        if (!ArrayToolkit::requireds($unregistedUser, array($registerMode))) {
+            throw $this->createInvalidArgumentException($registerMode.' is required.');
         }
 
-        $registerTypes = array_diff($registerTypes, array($registerType));
-        foreach ($registerTypes as $fillField) {
-            if (empty($unregistedUser[$fillField])) {
-                $unregistedUser[$fillField] = $this->randomStr(10);
-            }
-        }
-
+        unset($unregistedUser['login_name']);
         return $unregistedUser;
     }
 
@@ -83,8 +84,14 @@ class UserServiceImpl extends BaseService implements UserService
         }
 
         $unregistedUser['salt'] = $this->randomStr(32);
+//        $unregistedUser['password'] = $this->getPasswordEncoder()->encodePassword($unregistedUser['password'], $unregistedUser['salt']);
 
         return $unregistedUser;
+    }
+
+    protected function getPasswordEncoder()
+    {
+        return new PasswordEncoder('sha256');
     }
 
     protected function randomStr($length = 8)

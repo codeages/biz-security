@@ -24,30 +24,33 @@ class UserServiceTest extends IntegrationTestCase
     public function testInvalidParameterExceptionWhenCreateUser()
     {
         $user = $this->mockUser();
-        $registerType = $this->biz['user.options']['register_type'];
-        unset($user[$registerType]);
+        unset($user['login_name']);
 
         $this->getUserService()->register($user);
     }
 
-    public function testCreateUser()
+    public function testCreateUserWhenUsernameMode()
     {
+        $this->createUserByRegisterMode('username');
+    }
+
+    public function testCreateUserWhenEmailMode()
+    {
+        $this->createUserByRegisterMode('email');
+    }
+
+    public function testCreateUserWhenMobileMode()
+    {
+        $this->createUserByRegisterMode('mobile');
+    }
+
+    protected function createUserByRegisterMode($mode)
+    {
+        $this->biz['user.options.register_mode'] = $mode;
         unset($this->biz['user']);
-        $fields = array('username', 'email', 'mobile');
-
-        foreach ($fields as $registerType) {
-            $user = $this->mockUser();
-            $this->biz['user.options.register_type'] = $registerType;
-
-            $diffTypes = array_diff($fields, array($registerType));
-
-            foreach ($diffTypes as $diffType) {
-                unset($user[$diffType]);
-            }
-
-            $savedUser = $this->getUserService()->register($user);
-            $this->expectedUser($user, $savedUser);
-        }
+        $user = $this->mockUser();
+        $savedUser = $this->getUserService()->register($user);
+        $this->expectedUser($user, $savedUser);
     }
 
     public function testCreateUserWithBindType()
@@ -57,7 +60,7 @@ class UserServiceTest extends IntegrationTestCase
 
         $savedUser = $this->getUserService()->register($user, $userBind);
         $this->expectedUser($user, $savedUser);
-        $this->expectedUserBind($userBind, $user['bind']);
+        $this->expectedUserBind($userBind, $savedUser['bind']);
     }
 
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
@@ -104,9 +107,7 @@ class UserServiceTest extends IntegrationTestCase
     protected function mockUser()
     {
         return array(
-            'username' => 'test',
-            'email' => 'test@qq.com',
-            'mobile' => '18911111111',
+            'login_name' => 'test',
             'password' => '123456',
             'created_source' => 'web',
             'created_ip' => '127.0.0.1'
