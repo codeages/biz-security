@@ -70,8 +70,8 @@ class UserServiceImpl extends BaseService implements UserService
 
     public function unbindUser($type, $bindId)
     {
-        $bindedUser = $this->getUserBindDao()->getByTypeAndBindId($type, $bind['bind_id']);
-        if (!empty($bindedUser)) {
+        $bindedUser = $this->getUserBindDao()->getByTypeAndBindId($type, $bindId);
+        if (empty($bindedUser)) {
             throw $this->createInvalidArgumentException('args is invalid.');
         }
 
@@ -130,7 +130,25 @@ class UserServiceImpl extends BaseService implements UserService
 
     public function changePassword($userId, $newPassword, $oldPassword)
     {
-        // TODO: Implement changePassword() method.
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $oldPassword = $this->getPasswordEncoder()->encodePassword($oldPassword, $user['salt']);
+        if ($oldPassword != $user['password']) {
+            throw $this->createInvalidArgumentException('password is invalid.');
+        }
+
+        $salt = $this->randomStr(32);
+        $newPassword = $this->getPasswordEncoder()->encodePassword($newPassword, $salt);
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'salt' => $salt,
+            'password' => $newPassword,
+        ));
+
+        return $this->wrapUser($savedUser);
     }
 
     public function login($username, $password)
@@ -138,24 +156,114 @@ class UserServiceImpl extends BaseService implements UserService
         // TODO: Implement login() method.
     }
 
+    public function isValidLoginName($loginName)
+    {
+
+    }
+
+    public function renameNickname($userId, $nickname)
+    {
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'nickname' => $nickname,
+        ));
+
+        return $this->wrapUser($savedUser);
+    }
+
+    public function renameUsername($userId, $username)
+    {
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $exsitUser = $this->getUserDao()->getByUsername($username);
+        if (!empty($exsitUser)) {
+            throw $this->createInvalidArgumentException('username is exsit.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'username' => $username,
+        ));
+
+        return $this->wrapUser($savedUser);
+    }
+
     public function lockUser($userId)
     {
-        // TODO: Implement lockUser() method.
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        if ($user['locked']) {
+            throw $this->createInvalidArgumentException('user is locked.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'locked' => 1,
+        ));
+
+        return $this->wrapUser($savedUser);
     }
 
     public function unlockUser($userId)
     {
-        // TODO: Implement unlockUser() method.
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        if (empty($user['locked'])) {
+            throw $this->createInvalidArgumentException('user is unlocked.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'locked' => 0,
+        ));
+
+        return $this->wrapUser($savedUser);
     }
 
     public function verifyEmail($userId)
     {
-        // TODO: Implement verifyEmail() method.
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        if (!empty($user['email_verified'])) {
+            throw $this->createInvalidArgumentException('email is verifed.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'email_verified' => 1,
+        ));
+
+        return $this->wrapUser($savedUser);
     }
 
     public function verifyMobile($userId)
     {
-        // TODO: Implement verifyMobile() method.
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        if (!empty($user['mobile_verified'])) {
+            throw $this->createInvalidArgumentException('mobile is verifed.');
+        }
+
+        $savedUser = $this->getUserDao()->update($user['id'], array(
+            'mobile_verified' => 1,
+        ));
+
+        return $this->wrapUser($savedUser);
     }
 
     protected function getUserDao()

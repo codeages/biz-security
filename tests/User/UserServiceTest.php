@@ -2,8 +2,6 @@
 
 namespace Tests;
 
-
-
 use Codeages\Biz\Framework\Util\ArrayToolkit;
 use Codeages\Biz\User\Service\UserService;
 
@@ -74,6 +72,78 @@ class UserServiceTest extends IntegrationTestCase
 
         $bind = $this->getUserBindDao()->get($savedUser['bind']['id']);
         $this->assertEmpty($bind);
+    }
+
+    public function testChangePassword()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $savedUser = $this->getUserService()->changePassword($savedUser['id'], '123456', $user['password']);
+        $this->expectedUser($user, $savedUser);
+    }
+
+    public function testlockUser()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+        $this->assertEquals(0, $savedUser['locked']);
+
+        $savedUser = $this->getUserService()->lockUser($savedUser['id']);
+        $this->assertEquals(1, $savedUser['locked']);
+
+        $savedUser = $this->getUserService()->unlockUser($savedUser['id']);
+        $this->assertEquals(0, $savedUser['locked']);
+    }
+
+    public function testVerifyEmail()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+        $this->assertEquals(0, $savedUser['email_verified']);
+
+        $savedUser = $this->getUserService()->verifyEmail($savedUser['id']);
+        $this->assertEquals(1, $savedUser['email_verified']);
+    }
+
+    public function testVerifyMobile()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+        $this->assertEquals(0, $savedUser['mobile_verified']);
+
+        $savedUser = $this->getUserService()->verifyMobile($savedUser['id']);
+        $this->assertEquals(1, $savedUser['mobile_verified']);
+    }
+
+    public function testRenameUsername()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $savedUser = $this->getUserService()->renameUsername($savedUser['id'], 'hello_edusoho');
+        $this->assertEquals('hello_edusoho', $savedUser['username']);
+    }
+
+    public function testRenameNickname()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $savedUser = $this->getUserService()->renameNickname($savedUser['id'], '张三丰');
+        $this->assertEquals('张三丰', $savedUser['nickname']);
     }
 
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
