@@ -151,12 +151,25 @@ class UserServiceImpl extends BaseService implements UserService
         return $this->wrapUser($savedUser);
     }
 
-    public function login($username, $password)
+    public function login($loginName, $password)
     {
-        // TODO: Implement login() method.
+        $existUser = $this->getRegisterStrategy()->loadUserByLoginName($loginName);
+        if (!empty($existUser)) {
+            throw $this->createInvalidArgumentException('user is exist.');
+        }
+
+        $password = $this->getPasswordEncoder()->encodePassword($password, $existUser['salt']);
+        if ($existUser['password'] != $password) {
+            throw $this->createInvalidArgumentException('user is exist.');
+        }
+
+        $wrappedUser = $this->wrapUser($existUser);
+        $this->dispatch('user.login', $wrappedUser);
+
+        return $wrappedUser;
     }
 
-    public function isValidLoginName($loginName)
+    public function isLoginNameValid($loginName)
     {
 
     }
@@ -264,6 +277,16 @@ class UserServiceImpl extends BaseService implements UserService
         ));
 
         return $this->wrapUser($savedUser);
+    }
+
+    public function searchUsers($conditions, $orderBys, $start, $limit)
+    {
+        return $this->getUserDao()->search($conditions, $orderBys, $start, $limit);
+    }
+
+    public function countUsers($conditions)
+    {
+        return $this->getUserDao()->count($conditions);
     }
 
     protected function getUserDao()

@@ -13,7 +13,7 @@ interface UserService
 
     public function bindUser($bind);
 
-    public function isValidLoginName($loginName);
+    public function isLoginNameValid($loginName);
 
     public function renameNickname($userId, $nickname);
 
@@ -23,7 +23,11 @@ interface UserService
 
     public function changePassword($userId, $newPassword, $oldPassword);
 
-    public function login($username, $password);
+    public function login($loginName, $password);
+
+    public function searchUsers($conditions, $orderBys, $start, $limit);
+
+    public function countUsers($conditions);
 
     public function lockUser($userId);
 
