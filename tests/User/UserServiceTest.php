@@ -57,10 +57,23 @@ class UserServiceTest extends IntegrationTestCase
     {
         $user = $this->mockUser();
         $userBind = $this->mockUserBind();
-
-        $savedUser = $this->getUserService()->register($user, $userBind);
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
         $this->expectedUser($user, $savedUser);
         $this->expectedUserBind($userBind, $savedUser['bind']);
+    }
+
+    public function testUnbindUser()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $this->getUserService()->unbindUser($userBind['type'], $userBind['bind_id']);
+
+        $bind = $this->getUserBindDao()->get($savedUser['bind']['id']);
+        $this->assertEmpty($bind);
     }
 
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
@@ -122,4 +135,8 @@ class UserServiceTest extends IntegrationTestCase
         return $this->biz->service('User:UserService');
     }
 
+    protected function getUserBindDao()
+    {
+        return $this->biz->dao('User:UserBindDao');
+    }
 }

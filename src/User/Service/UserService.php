@@ -9,7 +9,11 @@ interface UserService
      * @param $user
      * @return mixed
      */
-    public function register($user, $bind = array());
+    public function register($user);
+
+    public function bindUser($bind);
+
+    public function unbindUser($type, $bindId);
 
     public function changePassword($userId, $newPassword, $oldPassword);
 

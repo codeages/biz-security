@@ -28,7 +28,6 @@ class PasswordEncoder
         if (!in_array($this->algorithm, hash_algos(), true)) {
             throw new InvalidArgumentException(sprintf('The algorithm "%s" is not supported.', $this->algorithm));
         }
-
         $salted = $this->mergePasswordAndSalt($raw, $salt);
         $digest = hash($this->algorithm, $salted, true);
 

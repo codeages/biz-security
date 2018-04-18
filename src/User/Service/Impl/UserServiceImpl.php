@@ -9,17 +9,13 @@ use Codeages\Biz\Framework\Service\BaseService;
 
 class UserServiceImpl extends BaseService implements UserService
 {
-    public function register($user, $bind = array())
+    public function register($user)
     {
         $userFields = array('login_name', 'password', 'created_ip', 'created_source');
         $unregistedUser = ArrayToolkit::parts($user, $userFields);
 
         if (!ArrayToolkit::requireds($unregistedUser, $userFields)) {
             throw $this->createInvalidArgumentException('user args is invalid.');
-        }
-
-        if (!empty($bind) && !ArrayToolkit::requireds($bind, array('type', 'type_alias', 'bind_id'))) {
-            throw $this->createInvalidArgumentException('user bind args is invalid.');
         }
 
         $registedUser = array();
@@ -38,10 +34,7 @@ class UserServiceImpl extends BaseService implements UserService
             $unregistedUser = $this->fillLoginName($unregistedUser);
 
             $registedUser = $this->getUserDao()->create($unregistedUser);
-            if (!empty($bind)) {
-                $bindUser = $this->bindUser($registedUser, $bind);
-                $registedUser['bind'] = $bindUser;
-            }
+            
             $this->commit();
         } catch (ServiceException $e) {
             $this->rollback();
@@ -54,10 +47,35 @@ class UserServiceImpl extends BaseService implements UserService
         return $wrappedUser;
     }
 
-    protected function bindUser($registedUser, $bind)
+    public function bindUser($bind)
     {
+        if (!empty($bind) && !ArrayToolkit::requireds($bind, array('type', 'type_alias', 'bind_id'))) {
+            throw $this->createInvalidArgumentException('user bind args is invalid.');
+        }
+
+        $bindedUser = $this->getUserBindDao()->getByTypeAndBindId($bind['type'], $bind['bind_id']);
+        if (!empty($bindedUser)) {
+            throw $this->createInvalidArgumentException('user bind args is invalid.');
+        }
+
+        $registedUser = $this->register($bind);
+
+        $bind = ArrayToolkit::parts($bind, array('type', 'type_alias', 'bind_id'));
         $bind['user_id'] = $registedUser['id'];
-        return $this->getUserBindDao()->create($bind);
+
+        $savedBind = $this->getUserBindDao()->create($bind);
+        $registedUser['bind'] = $savedBind;
+        return $registedUser;
+    }
+
+    public function unbindUser($type, $bindId)
+    {
+        $bindedUser = $this->getUserBindDao()->getByTypeAndBindId($type, $bind['bind_id']);
+        if (!empty($bindedUser)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $this->getUserBindDao()->deleteByTypeAndBindId($type, $bindId);
     }
 
     protected function wrapUser($user)
@@ -91,8 +109,7 @@ class UserServiceImpl extends BaseService implements UserService
         }
 
         $unregistedUser['salt'] = $this->randomStr(32);
-//        $unregistedUser['password'] = $this->getPasswordEncoder()->encodePassword($unregistedUser['password'], $unregistedUser['salt']);
-
+        $unregistedUser['password'] = $this->getPasswordEncoder()->encodePassword($unregistedUser['password'], $unregistedUser['salt']);
         return $unregistedUser;
     }
 
@@ -105,8 +122,7 @@ class UserServiceImpl extends BaseService implements UserService
     {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $str = '';
-        for ( $i = 0; $i < $length; $i++ )
-        {
+        for ($i = 0; $i < $length; $i++) {
             $str .= $chars[ mt_rand(0, strlen($chars) - 1) ];
         }
         return $str;
