@@ -182,6 +182,27 @@ class UserServiceTest extends IntegrationTestCase
         $this->assertEmpty($roles);
     }
 
+    public function testHasPermissions()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $role1 = $this->mockRole();
+        $savedRole1 = $this->getRoleService()->createRole($role1);
+
+        $role2 = $this->mockRole();
+        $role2['code'] = 'SuperAdmin';
+        $role2['data'] = array('user:manage', 'user:create');
+        $savedRole2 = $this->getRoleService()->createRole($role2);
+
+        $this->getUserService()->reBindRolesByUserId($savedUser['id'], array($savedRole1['id'], $savedRole2['id']));
+
+        $this->assertTrue($this->getUserService()->hasPermissions($savedUser['id'], $role2['data']));
+        $this->assertFalse($this->getUserService()->hasPermissions($savedUser['id'], array('user:delete')));
+    }
+
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
     {
         foreach (array('type', 'type_alias', 'bind_id') as $key) {

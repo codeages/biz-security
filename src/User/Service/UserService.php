@@ -42,4 +42,6 @@ interface UserService
     public function clearRolesByUserId($userId);
 
     public function findRolesByUserId($userId);
+
+    public function hasPermissions($userId, $permissions);
 }

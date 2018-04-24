@@ -334,6 +334,19 @@ class UserServiceImpl extends BaseService implements UserService
         return $this->getRoleService()->findRolesByIds($roleIds);
     }
 
+    public function hasPermissions($userId, $permissions)
+    {
+        $roles = $this->findRolesByUserId($userId);
+        $rolePermissions = array();
+        foreach ($roles as $role) {
+            $rolePermissions = array_merge($rolePermissions, $role['data']);
+        }
+
+        $diff = array_diff($permissions, $rolePermissions);
+
+        return empty($diff);
+    }
+
     protected function getUserDao()
     {
         return $this->biz->dao('User:UserDao');
