@@ -20,6 +20,8 @@ interface RoleService
 
     public function findRolesByCodes(array $codes);
 
+    public function findRolesByIds(array $ids);
+
     public function searchRoles($conditions, $sort, $start, $limit);
 
     public function countRoles($conditions);

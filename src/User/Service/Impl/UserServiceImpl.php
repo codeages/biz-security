@@ -294,6 +294,46 @@ class UserServiceImpl extends BaseService implements UserService
         return $this->getUserDao()->count($conditions);
     }
 
+    public function reBindRolesByUserId($userId, $roleIds)
+    {
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $this->clearRolesByUserId($userId);
+        foreach ($roleIds as $roleId) {
+            $userHasRole = array(
+                'role_id' => $roleId,
+                'user_id' => $userId,
+            );
+
+            $this->getUserHasRoleDao()->create($userHasRole);
+        }
+    }
+
+    public function clearRolesByUserId($userId)
+    {
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $this->getUserHasRoleDao()->deleteByUserId($userId);
+    }
+
+    public function findRolesByUserId($userId)
+    {
+        $user = $this->getUserDao()->get($userId);
+        if (empty($user)) {
+            throw $this->createInvalidArgumentException('args is invalid.');
+        }
+
+        $userHasRoles = $this->getUserHasRoleDao()->findByUserId($userId);
+        $roleIds = ArrayToolkit::column($userHasRoles, 'role_id');
+        return $this->getRoleService()->findRolesByIds($roleIds);
+    }
+
     protected function getUserDao()
     {
         return $this->biz->dao('User:UserDao');
@@ -307,5 +347,10 @@ class UserServiceImpl extends BaseService implements UserService
     protected function getUserHasRoleDao()
     {
         return $this->biz->dao('User:UserHasRoleDao');
+    }
+
+    protected function getRoleService()
+    {
+        return $this->biz->service('Role:RoleService');
     }
 }

@@ -36,4 +36,10 @@ interface UserService
     public function verifyEmail($userId);
 
     public function verifyMobile($userId);
+
+    public function reBindRolesByUserId($userId, $bindRoleIds);
+
+    public function clearRolesByUserId($userId);
+
+    public function findRolesByUserId($userId);
 }

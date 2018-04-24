@@ -2,12 +2,24 @@
 
 namespace Codeages\Biz\User\Dao\Impl;
 
-use Codeages\Biz\User\Dao\UserDao;
+use Codeages\Biz\User\Dao\UserHasRoleDao;
 use Codeages\Biz\Framework\Dao\GeneralDaoImpl;
 
-class UserHasRoleDaoImpl extends GeneralDaoImpl implements UserDao
+class UserHasRoleDaoImpl extends GeneralDaoImpl implements UserHasRoleDao
 {
     protected $table = 'biz_security_user_has_role';
+
+    public function deleteByUserId($userId)
+    {
+        return $this->db()->delete($this->table(), array('user_id' => $userId));
+    }
+
+    public function findByUserId($userId)
+    {
+        return $this->findByFields(array(
+            'user_id' => $userId
+        ));
+    }
 
     public function declares()
     {

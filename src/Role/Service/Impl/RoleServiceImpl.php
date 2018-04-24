@@ -80,6 +80,11 @@ class RoleServiceImpl extends BaseService implements RoleService
         return $this->getRoleDao()->count($conditions);
     }
 
+    public function findRolesByIds(array $ids)
+    {
+        return $this->getRoleDao()->findByIds($ids);
+    }
+
     protected function getRoleDao()
     {
         return $this->biz->dao('Role:RoleDao');

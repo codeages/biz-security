@@ -16,7 +16,20 @@ class RoleDaoImpl extends GeneralDaoImpl implements RoleDao
 
     public function findByCodes($codes)
     {
+        if (empty($codes)) {
+            return array();
+        }
+
         return $this->findInField('code', $codes);
+    }
+
+    public function findByIds($ids)
+    {
+        if (empty($ids)) {
+            return array();
+        }
+        
+        return $this->findInField('id', $ids);
     }
 
     public function getByName($name)

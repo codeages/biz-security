@@ -157,6 +157,31 @@ class UserServiceTest extends IntegrationTestCase
         $this->expectedUser($user, $savedUser);
     }
 
+    public function testClearRoles()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $role1 = $this->mockRole();
+        $savedRole1 = $this->getRoleService()->createRole($role1);
+
+        $role2 = $this->mockRole();
+        $role2['code'] = 'SuperAdmin';
+        $savedRole2 = $this->getRoleService()->createRole($role2);
+
+        $this->getUserService()->reBindRolesByUserId($savedUser['id'], array($savedRole1['id'], $savedRole2['id']));
+
+        $roles = $this->getUserService()->findRolesByUserId($savedUser['id']);
+        $this->assertRole($role1, $roles[0]);
+        $this->assertRole($role2, $roles[1]);
+
+        $this->getUserService()->clearRolesByUserId($savedUser['id']);
+        $roles = $this->getUserService()->findRolesByUserId($savedUser['id']);
+        $this->assertEmpty($roles);
+    }
+
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
     {
         foreach (array('type', 'type_alias', 'bind_id') as $key) {
@@ -169,6 +194,13 @@ class UserServiceTest extends IntegrationTestCase
             if (!empty($unAssertKeys) && !in_array($key, $unAssertKeys)) {
                 $this->assertEquals($expectedBind, $actualBind);
             }
+        }
+    }
+
+    protected function assertRole($expectedRole, $actrueRole)
+    {
+        foreach ($expectedRole as $key => $value) {
+            $this->assertEquals($expectedRole[$key], $actrueRole[$key]);
         }
     }
 
@@ -208,12 +240,26 @@ class UserServiceTest extends IntegrationTestCase
         );
     }
 
+    protected function mockRole()
+    {
+        return array(
+            'code' => 'Admin',
+            'name' => '超级管理员',
+            'data' => array('org:manage')
+        );
+    }
+
     /**
      * @return UserService
      */
     protected function getUserService()
     {
         return $this->biz->service('User:UserService');
+    }
+
+    protected function getRoleService()
+    {
+        return $this->biz->service('Role:RoleService');
     }
 
     protected function getUserBindDao()
