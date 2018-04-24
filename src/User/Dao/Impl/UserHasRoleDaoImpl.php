@@ -14,6 +14,11 @@ class UserHasRoleDaoImpl extends GeneralDaoImpl implements UserHasRoleDao
         return $this->db()->delete($this->table(), array('user_id' => $userId));
     }
 
+    public function deleteByRoleId($roleId)
+    {
+        return $this->db()->delete($this->table(), array('role_id' => $roleId));
+    }
+
     public function findByUserId($userId)
     {
         return $this->findByFields(array(

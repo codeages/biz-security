@@ -201,6 +201,9 @@ class UserServiceTest extends IntegrationTestCase
 
         $this->assertTrue($this->getUserService()->hasPermissions($savedUser['id'], $role2['data']));
         $this->assertFalse($this->getUserService()->hasPermissions($savedUser['id'], array('user:delete')));
+
+        $this->getRoleService()->deleteRole($savedRole2['id']);
+        $this->assertFalse($this->getUserService()->hasPermissions($savedUser['id'], $role2['data']));
     }
 
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())

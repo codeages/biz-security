@@ -8,5 +8,7 @@ interface UserHasRoleDao extends GeneralDaoInterface
 {
     public function deleteByUserId($userId);
 
+    public function deleteByRoleId($roleId);
+
     public function findByUserId($userId);
 }

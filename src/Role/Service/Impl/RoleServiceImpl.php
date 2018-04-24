@@ -38,7 +38,13 @@ class RoleServiceImpl extends BaseService implements RoleService
 
     public function deleteRole($id)
     {
-        return $this->getRoleDao()->delete($id);
+        $savedRole = $this->getRoleDao()->get($id);
+        if (empty($savedRole)) {
+            throw new InvalidArgumentException('role is not exsit.');
+        }
+
+        $this->getRoleDao()->delete($id);
+        $this->dispatch('role.deleted', $savedRole);
     }
 
     public function disableRole($id)
