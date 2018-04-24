@@ -49,6 +49,17 @@ class BizUser extends Migration
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
         ");
 
+        $connection->exec("
+          CREATE TABLE `biz_security_user_has_role` (
+            `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
+            `user_id` INT(10) unsigned NOT NULL COMMENT '用户id',
+            `role_id` INT(10) unsigned NOT NULL COMMENT '角色id',
+            `created_user_id` INT(10) unsigned NOT NULL DEFAULT 0 COMMENT '创建者',
+            `created_time` INT(10) unsigned NOT NULL DEFAULT '0',
+            `updated_time` INT(10) unsigned NOT NULL DEFAULT '0',
+            PRIMARY KEY (`id`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ");
     }
 
     protected function isFieldExist($table, $filedName)

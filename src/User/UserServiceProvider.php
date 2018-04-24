@@ -16,7 +16,6 @@ class UserServiceProvider implements ServiceProviderInterface
         $biz['migration.directories'][] = dirname(dirname(__DIR__)).'/migrations/user';
         $biz['autoload.aliases']['User'] = 'Codeages\Biz\User';
 
-
         $biz['console.commands'][] = function () use ($biz) {
             return new \Codeages\Biz\User\Command\TableCommand($biz);
         };

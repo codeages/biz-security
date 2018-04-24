@@ -154,7 +154,7 @@ class UserServiceImpl extends BaseService implements UserService
     public function login($loginName, $password)
     {
         $existUser = $this->getRegisterStrategy()->loadUserByLoginName($loginName);
-        if (!empty($existUser)) {
+        if (empty($existUser)) {
             throw $this->createInvalidArgumentException('user is exist.');
         }
 
@@ -167,6 +167,11 @@ class UserServiceImpl extends BaseService implements UserService
         $this->dispatch('user.login', $wrappedUser);
 
         return $wrappedUser;
+    }
+
+    public function loginWithBindUser()
+    {
+        
     }
 
     public function isLoginNameValid($loginName)
@@ -297,5 +302,10 @@ class UserServiceImpl extends BaseService implements UserService
     protected function getUserBindDao()
     {
         return $this->biz->dao('User:UserBindDao');
+    }
+
+    protected function getUserHasRoleDao()
+    {
+        return $this->biz->dao('User:UserHasRoleDao');
     }
 }

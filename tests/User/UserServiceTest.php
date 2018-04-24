@@ -146,6 +146,17 @@ class UserServiceTest extends IntegrationTestCase
         $this->assertEquals('张三丰', $savedUser['nickname']);
     }
 
+    public function testLogin()
+    {
+        $user = $this->mockUser();
+        $userBind = $this->mockUserBind();
+        $bind = array_merge($user, $userBind);
+        $savedUser = $this->getUserService()->bindUser($bind);
+
+        $savedUser = $this->getUserService()->login($user['login_name'], $user['password']);
+        $this->expectedUser($user, $savedUser);
+    }
+
     protected function expectedUserBind($expectedBind, $actualBind, $unAssertKeys = array())
     {
         foreach (array('type', 'type_alias', 'bind_id') as $key) {

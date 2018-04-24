@@ -8,7 +8,8 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Codeages\\Biz\\User\\": "src/User/"
+      "Codeages\\Biz\\User\\": "src/User/",
+      "Codeages\\Biz\\Role\\": "src/Role/"
     }
   },
   "autoload-dev": {
