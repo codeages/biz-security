@@ -3,12 +3,14 @@
   "description": "security module",
   "type": "library",
   "require": {
-    "codeages/biz-framework": "^0.9"
+    "codeages/biz-framework": "^0.9",
+    "bshaffer/oauth2-server-php": "^1.10"
   },
   "license": "MIT",
   "autoload": {
     "psr-4": {
       "Codeages\\Biz\\User\\": "src/User/",
+      "Codeages\\Biz\\Org\\": "src/Org/",
       "Codeages\\Biz\\Role\\": "src/Role/"
     }
   },
