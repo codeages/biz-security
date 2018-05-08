@@ -5,6 +5,7 @@ namespace Tests;
 use Codeages\Biz\Framework\Dao\ArrayStorage;
 use Codeages\Biz\Framework\Dao\Connection;
 use Codeages\Biz\Role\RoleServiceProvider;
+use Codeages\Biz\Org\OrgServiceProvider;
 use Codeages\Biz\User\UserServiceProvider;
 use Codeages\Biz\Framework\Provider\DoctrineServiceProvider;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -84,6 +85,7 @@ class IntegrationTestCase extends TestCase
         $biz->register(new DoctrineServiceProvider());
         $biz->register(new RoleServiceProvider());
         $biz->register(new UserServiceProvider());
+        $biz->register(new OrgServiceProvider());
 
         $cacheEnabled = getenv('CACHE_ENABLED');
 
