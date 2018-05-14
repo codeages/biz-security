@@ -3,9 +3,9 @@
 namespace Tests;
 
 use Codeages\Biz\Framework\Util\ArrayToolkit;
-use Codeages\Biz\User\Service\SecureLevel\MiddleLevel;
+use Codeages\Biz\User\Service\SecureLevel\HighLevel;
 
-class MiddleLevelTest extends IntegrationTestCase
+class HighLevelTest extends IntegrationTestCase
 {
     public function setUp()
     {
@@ -17,7 +17,7 @@ class MiddleLevelTest extends IntegrationTestCase
 
         $this->biz['user.options'] = array(
     		'register_mode' => 'email',      // username, email, mobile, email_or_mobile
-            'register_secure_level' => 'middle',  // none, low, middle, high
+            'register_secure_level' => 'high',  // none, low, middle, high
     	);
     }
 
@@ -26,10 +26,10 @@ class MiddleLevelTest extends IntegrationTestCase
      */
     public function testCheckWhenCapthaEmpty()
     {
-    	$lowLevel = new MiddleLevel($this->biz);
-    	$user = $this->mockUser();
-    	unset($user['captcha']);
-    	$lowLevel->check($user);
+        $lowLevel = new HighLevel($this->biz);
+        $user = $this->mockUser();
+        unset($user['captcha']);
+        $lowLevel->check($user);
     }
 
     /**
@@ -37,10 +37,10 @@ class MiddleLevelTest extends IntegrationTestCase
      */
     public function testCheckWhenCapthaIsError()
     {
-    	$lowLevel = new MiddleLevel($this->biz);
-    	$user = $this->mockUser();
-    	$user['captcha']['data'] = '123';
-    	$lowLevel->check($user);
+        $lowLevel = new HighLevel($this->biz);
+        $user = $this->mockUser();
+        $user['captcha']['data'] = '123';
+        $lowLevel->check($user);
     }
 
     /**
@@ -48,44 +48,44 @@ class MiddleLevelTest extends IntegrationTestCase
      */
     public function testCheckWhenRateLimiterIsPool()
     {
-        for ($i=0; $i < 30; $i++) { 
-        	$user = $this->mockUser();
+        for ($i=0; $i < 1; $i++) { 
+            $user = $this->mockUser();
             $user['login_name'] = $user['login_name'].$i;
             $this->getUserService()->register($user);
         }
         
         $user = $this->mockUser();
-        $lowLevel = new MiddleLevel($this->biz);
-    	$lowLevel->check($user);
+        $lowLevel = new HighLevel($this->biz);
+        $lowLevel->check($user);
     }
 
     public function testCheck()
     {
         $user = $this->mockUser();
         
-        $lowLevel = new MiddleLevel($this->biz);
+        $lowLevel = new HighLevel($this->biz);
         $lowLevel->check($user);
     }
 
     protected function mockUser()
     {
-    	$token = $this->getTokenService()->generate('user.register', 60, 1, array('captcha'=>'123456'));
-    	$user = array(
-    		'login_name' => 'test',
+        $token = $this->getTokenService()->generate('user.register', 60, 1, array('captcha'=>'123456'));
+        $user = array(
+            'login_name' => 'test',
             'password' => '123456',
             'created_source' => 'web',
             'created_ip' => '127.0.0.1',
             'captcha' => array(
-            	'key' => $token['key'],
-            	'data' => '123456'
+                'key' => $token['key'],
+                'data' => '123456'
             )
-    	);
-    	return $user;
+        );
+        return $user;
     }
 
     protected function getTokenService()
     {
-    	return $this->biz->service('Token:TokenService');
+        return $this->biz->service('Token:TokenService');
     }
 
     protected function getUserService()

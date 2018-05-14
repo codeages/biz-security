@@ -2,50 +2,55 @@
 
 namespace Codeages\Biz\User\Service\SecureLevel;
 
+use Codeages\Biz\Framework\Service\Exception\InvalidArgumentException;
+
 class HighLevel extends AbstractSecureLevel 
 {
 	protected function checkEmailMode($user)
 	{
-		$lowLevel = $this->biz['user_register_secure_level']['low'];
-		if (!$lowLevel->checkEmail($user) && !$this->checkRegistedUsers($user)) {
-			return false;
+		$this->lowLevelCheck($user);
+		if (!$this->checkRegistedUsers($user)) {
+			throw new InvalidArgumentException("rate limiter is pool, can't create user");
 		}
-		return true;
 	}
 
 	protected function checkMobileMode($user)
 	{
-		$lowLevel = $this->biz['user_register_secure_level']['low'];
-		if (!$lowLevel->checkMobileMode($user) && !$this->checkRegistedUsers($user)) {
-			return false;
+		$this->lowLevelCheck($user);
+		if (!$this->checkRegistedUsers($user)) {
+			throw new InvalidArgumentException("rate limiter is pool, can't create user");
 		}
-		return true;
 	}
 
 	protected function checkEmailOrMobileMode($user)
 	{
-		$lowLevel = $this->biz['user_register_secure_level']['low'];
-		if (!$lowLevel->checkEmailOrMobileMode($user) && !$this->checkRegistedUsers($user)) {
-			return false;
+		$this->lowLevelCheck($user);
+		if (!$this->checkRegistedUsers($user)) {
+			throw new InvalidArgumentException("rate limiter is pool, can't create user");
 		}
-		return true;
 	}
+
+	protected function lowLevelCheck($user)
+    {
+        $lowLevel = $this->biz['user_register_secure_level.low'];
+        $lowLevel->check($user);
+    }
 
 	protected function checkRegistedUsers($user)
 	{
 		$condition = array(
-            'startTime' => time() - 24 * 3600,
-            'createdIp' => $user['created_ip'],
+            'created_time_LT' => time() - 24 * 3600,
+            'created_ip' => $user['created_ip'],
         );
         $registerCount = $this->getUserService()->countUsers($condition);
 
-        if ($registerCount > 10) {
+        if ($registerCount >= 10) {
             return false;
         }
 
         $registerCount = $this->getUserService()->countUsers(array(
-            'startTime' => time() - 3600,
-            'createdIp' => $user['created_ip'],
+            'created_time_LT' => time() - 3600,
+            'created_ip' => $user['created_ip'],
         ));
 
         if ($registerCount >= 1) {

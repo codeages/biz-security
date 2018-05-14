@@ -18,7 +18,7 @@ class UserServiceImpl extends BaseService implements UserService
             throw $this->createInvalidArgumentException('user args is invalid.');
         }
 
-        $this->getSecureLevel()->check($userFields);
+        $this->getSecureLevel()->check($user);
 
         $registedUser = array();
 

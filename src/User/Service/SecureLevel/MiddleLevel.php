@@ -47,7 +47,7 @@ class MiddleLevel extends AbstractSecureLevel
         );
         $registerCount = $this->getUserService()->countUsers($condition);
 
-        if ($registerCount > 30) {
+        if ($registerCount >= 30) {
             return false;
         }
 
