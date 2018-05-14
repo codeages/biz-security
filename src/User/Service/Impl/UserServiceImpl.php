@@ -18,6 +18,8 @@ class UserServiceImpl extends BaseService implements UserService
             throw $this->createInvalidArgumentException('user args is invalid.');
         }
 
+        $this->getSecureLevel()->check($userFields);
+
         $registedUser = array();
 
         $lockKey = 'user_register.'.$unregistedUser['login_name'];
@@ -78,6 +80,11 @@ class UserServiceImpl extends BaseService implements UserService
         $this->getUserBindDao()->deleteByTypeAndBindId($type, $bindId);
     }
 
+    protected function getSecureLevel()
+    {
+        return $this->biz['user_register_secure_level.'.$this->biz['user.options.final']['register_secure_level']];
+    }
+
     protected function wrapUser($user)
     {
         unset($user['password']);
@@ -96,7 +103,7 @@ class UserServiceImpl extends BaseService implements UserService
 
     protected function getRegisterStrategy()
     {
-        $userOptions = $this->biz['user.options'];
+        $userOptions = $this->biz['user.options.final'];
         $registerMode = $userOptions['register_mode'];
 
         return $this->biz['user_register_mode.'.$registerMode];

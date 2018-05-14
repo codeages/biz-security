@@ -44,7 +44,7 @@ class UserServiceTest extends IntegrationTestCase
 
     protected function createUserByRegisterMode($mode)
     {
-        $this->biz['user.options.register_mode'] = $mode;
+        $this->biz['user.options']['register_mode'] = $mode;
         unset($this->biz['user']);
         $user = $this->mockUser();
         $savedUser = $this->getUserService()->register($user);

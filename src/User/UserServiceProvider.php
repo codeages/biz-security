@@ -6,6 +6,10 @@ use Codeages\Biz\User\Service\RegisterStrategy\EmailOrMobileRegisterMode;
 use Codeages\Biz\User\Service\RegisterStrategy\EmailRegisterMode;
 use Codeages\Biz\User\Service\RegisterStrategy\MobileRegisterMode;
 use Codeages\Biz\User\Service\RegisterStrategy\UsernameRegisterMode;
+use Codeages\Biz\User\Service\SecureLevel\NoneLevel;
+use Codeages\Biz\User\Service\SecureLevel\LowLevel;
+use Codeages\Biz\User\Service\SecureLevel\MiddleLevel;
+use Codeages\Biz\User\Service\SecureLevel\HighLevel;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -20,14 +24,21 @@ class UserServiceProvider implements ServiceProviderInterface
             return new \Codeages\Biz\User\Command\TableCommand($biz);
         };
 
-        $biz['user.options.register_mode'] = 'username';
+        $biz['user.options'] = array();
 
-        $biz['user.options'] = $biz->factory(function () use ($biz) {
-            return array(
-                'register_mode' => $biz['user.options.register_mode'], // username, email, mobile
-            );
+        $biz['user.options.final'] = $biz->factory(function () use ($biz) {
+            return array_merge(array(
+                'register_mode' => 'username',      // username, email, mobile, email_or_mobile
+                'register_secure_level' => 'none',  // none, low, middle, high
+            ), $biz['user.options']);
         });
 
+        $this->registerModes($biz);
+        $this->registerSecureLevels($biz);
+    }
+
+    protected function registerModes($biz)
+    {
         $registerModes = array(
             'email' => EmailRegisterMode::class,
             'mobile' => MobileRegisterMode::class,
@@ -44,4 +55,21 @@ class UserServiceProvider implements ServiceProviderInterface
         }
     }
 
+    protected function registerSecureLevels($biz)
+    {
+        $levels = array(
+            'none' => NoneLevel::class,
+            'low' => LowLevel::class,
+            'middle' => MiddleLevel::class,
+            'high' => HighLevel::class,
+        );
+
+        $levelKeys = array_keys($levels);
+        foreach ($levelKeys as $levelKey) {
+            $class = $levels[$levelKey];
+            $biz['user_register_secure_level.'.$levelKey] = function () use ($biz, $class) {
+                return new $class($biz);
+            };
+        }
+    }
 }

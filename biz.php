@@ -24,9 +24,11 @@ $options = array(
 $biz = new Biz($options);
 $biz->register(new \Codeages\Biz\Framework\Provider\DoctrineServiceProvider());
 $biz->register(new \Codeages\Biz\Framework\Provider\TargetlogServiceProvider());
+$biz->register(new \Codeages\Biz\Framework\Provider\TokenServiceProvider());
 $biz->register(new \Codeages\Biz\User\UserServiceProvider());
 $biz->register(new \Codeages\Biz\Org\OrgServiceProvider());
 $biz->register(new \Codeages\Biz\Role\RoleServiceProvider());
+
 
 $biz->register(new \Codeages\Biz\Framework\Provider\MonologServiceProvider(), [
     'monolog.logfile' => $biz['log_dir'].'/biz.log',

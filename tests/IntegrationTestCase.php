@@ -8,6 +8,7 @@ use Codeages\Biz\Role\RoleServiceProvider;
 use Codeages\Biz\Org\OrgServiceProvider;
 use Codeages\Biz\User\UserServiceProvider;
 use Codeages\Biz\Framework\Provider\DoctrineServiceProvider;
+use Codeages\Biz\Framework\Provider\TokenServiceProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Codeages\Biz\Framework\Context\Biz;
@@ -86,6 +87,7 @@ class IntegrationTestCase extends TestCase
         $biz->register(new RoleServiceProvider());
         $biz->register(new UserServiceProvider());
         $biz->register(new OrgServiceProvider());
+        $biz->register(new TokenServiceProvider());
 
         $cacheEnabled = getenv('CACHE_ENABLED');
 

@@ -20,6 +20,8 @@ class UserDaoImpl extends GeneralDaoImpl implements UserDao
                 'created_time',
             ),
             'conditions' => array(
+                'created_ip = :created_ip',
+                'created_time > :created_time_LT',
             ),
         );
     }
