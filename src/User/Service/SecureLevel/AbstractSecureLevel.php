@@ -58,9 +58,18 @@ abstract class AbstractSecureLevel
 
 	public function check($user)
 	{
+		if ($this->inWhiteList($user)) {
+			return;
+		}
+
 		$registerMode = $this->getRegisterMode();
 		$registerMode = $this->convert($registerMode);
 		$method = "check{$registerMode}Mode";
-		return $this->$method($user);
+		$this->$method($user);
+	}
+
+	protected function inWhiteList($user)
+	{
+		return false;
 	}
 }

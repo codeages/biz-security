@@ -2,20 +2,21 @@
 
 namespace Codeages\Biz\User\Service\RegisterStrategy;
 
+use Codeages\Biz\Framework\Service\Exception\InvalidArgumentException;
+
 class MobileRegisterMode extends AbstractRegisterMode
 {
     public function fillUnRegisterUser($unregistedUser)
     {
-        $unregistedUser['mobile'] = $unregistedUser['login_name'];
+        $loginName = $unregistedUser['login_name'];
+        if(!preg_match("/^1[123456789]{1}\d{9}$/", $loginName)) {  
+            throw new InvalidArgumentException('mobile is invalid.');
+        }
 
-        $unregistedUser['nickname'] = $unregistedUser['login_name'];
-        $unregistedUser['email'] = $unregistedUser['login_name'].'@';
-        $unregistedUser['username'] = $unregistedUser['login_name'];
+        $unregistedUser['mobile'] = $loginName;
+        $unregistedUser['username'] = 'S'.$loginName;
+        $unregistedUser['nickname'] = 'S'.$loginName;
+
         return $unregistedUser;
-    }
-
-    public function loadUserByLoginName($loginName)
-    {
-        return $this->getUserDao()->getByMobile($loginName);
     }
 }

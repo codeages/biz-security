@@ -6,12 +6,14 @@ class EmailOrMobileRegisterMode extends AbstractRegisterMode
 {
     public function fillUnRegisterUser($unregistedUser)
     {
-        $unregistedUser['email'] = $unregistedUser['login_name'];
+        if (stripos($loginName, '@')) {
+            $unregistedUser['email'] = $unregistedUser['login_name'];
+        } elseif (preg_match("/^1[1234567890]{1}\d{9}$/",$loginName)) {
+            $unregistedUser['mobile'] = $unregistedUser['login_name'];
+        } else {
+        	$unregistedUser['username'] = $unregistedUser['login_name'];
+        }
+
         return $unregistedUser;
-    }
-
-    public function loadUserByLoginName($loginName)
-    {
-
     }
 }

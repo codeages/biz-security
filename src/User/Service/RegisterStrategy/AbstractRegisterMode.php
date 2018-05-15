@@ -27,7 +27,18 @@ abstract class AbstractRegisterMode
         return $this->biz->dao('User:UserDao');
     }
 
-    abstract public function loadUserByLoginName($loginName);
+    public function loadUserByLoginName($loginName)
+    {
+        if (stripos($loginName, '@') > 0) {
+            return $this->getUserDao()->getByEmail($loginName);
+        }
+
+        if (preg_match("/^1[1234567890]{1}\d{9}$/",$loginName)) {
+            return $this->getUserDao()->getByMobile($loginName);
+        }
+
+        return $this->getUserDao()->getByUsername($loginName);
+    }
 
     abstract public function fillUnRegisterUser($unregistedUser);
 }

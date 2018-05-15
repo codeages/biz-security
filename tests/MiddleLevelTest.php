@@ -71,7 +71,7 @@ class MiddleLevelTest extends IntegrationTestCase
     {
     	$token = $this->getTokenService()->generate('user.register', 60, 1, array('captcha'=>'123456'));
     	$user = array(
-    		'login_name' => 'test',
+    		'login_name' => 'test@qq.com',
             'password' => '123456',
             'created_source' => 'web',
             'created_ip' => '127.0.0.1',

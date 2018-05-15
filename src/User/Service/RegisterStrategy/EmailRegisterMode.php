@@ -2,20 +2,21 @@
 
 namespace Codeages\Biz\User\Service\RegisterStrategy;
 
+use Codeages\Biz\Framework\Service\Exception\InvalidArgumentException;
+
 class EmailRegisterMode extends AbstractRegisterMode
 {
     public function fillUnRegisterUser($unregistedUser)
     {
-        $unregistedUser['email'] = $unregistedUser['login_name'];
+        $loginName = $unregistedUser['login_name'];
+        if (!stripos($loginName, '@')) {
+            throw new InvalidArgumentException('email is invalid.');
+        }
 
-        $unregistedUser['nickname'] = $unregistedUser['login_name'];
-        $unregistedUser['username'] = $unregistedUser['login_name'];
-        $unregistedUser['mobile'] = $unregistedUser['login_name'];
+        $unregistedUser['email'] = $loginName;
+        $unregistedUser['username'] = substr($unregistedUser['login_name'], 0, stripos($loginName, '@'));
+        $unregistedUser['nickname'] = $unregistedUser['username'];
+
         return $unregistedUser;
-    }
-
-    public function loadUserByLoginName($loginName)
-    {
-        return $this->getUserDao()->getByEmail($loginName);
     }
 }
