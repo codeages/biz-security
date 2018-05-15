@@ -14,8 +14,8 @@ class EmailRegisterMode extends AbstractRegisterMode
         }
 
         $unregistedUser['email'] = $loginName;
-        $unregistedUser['username'] = substr($unregistedUser['login_name'], 0, stripos($loginName, '@'));
-        $unregistedUser['nickname'] = $unregistedUser['username'];
+        $username = substr($unregistedUser['login_name'], 0, stripos($loginName, '@'));
+        $unregistedUser['nickname'] = $username;
 
         return $unregistedUser;
     }

@@ -14,8 +14,7 @@ class MobileRegisterMode extends AbstractRegisterMode
         }
 
         $unregistedUser['mobile'] = $loginName;
-        $unregistedUser['username'] = 'S'.$loginName;
-        $unregistedUser['nickname'] = 'S'.$loginName;
+        $unregistedUser['nickname'] = $this->randomStr(2).$loginName;
 
         return $unregistedUser;
     }

@@ -16,7 +16,7 @@ class BizUser extends Migration
         $connection->exec("
           CREATE TABLE IF NOT EXISTS `biz_security_user` (
             `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
-            `username` VARCHAR(64) NOT NULL COMMENT '用户名',
+            `username` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '用户名',
             `email` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '邮箱',
             `mobile` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '手机号码',
             `nickname` VARCHAR(64) NOT NULL COMMENT '昵称',

@@ -41,6 +41,9 @@ class RegisterModeTest extends IntegrationTestCase
         $user = $this->mockUser();
         $user['login_name'] = 'test@qq.com';
         $unregisterUser = $emailRegisterMode->fillUnRegisterUser($user);
+        $this->assertEquals($user['login_name'], $unregisterUser['email']);
+        $this->assertEquals('test', $unregisterUser['nickname']);
+        $this->assertEmpty($unregisterUser['mobile']);
     }
 
     /**
@@ -60,6 +63,10 @@ class RegisterModeTest extends IntegrationTestCase
         $user = $this->mockUser();
         $user['login_name'] = '18765467896';
         $unregisterUser = $registerMode->fillUnRegisterUser($user);
+
+        $this->assertEquals($user['login_name'], $unregisterUser['mobile']);
+        $this->assertNotEmpty($unregisterUser['nickname']);
+        $this->assertEmpty($unregisterUser['email']);
     }
 
     /**
@@ -79,6 +86,11 @@ class RegisterModeTest extends IntegrationTestCase
         $registerMode = $this->createUsernameRegisterMode();
         $user = $this->mockUser();
         $unregisterUser = $registerMode->fillUnRegisterUser($user);
+
+        $this->assertEquals($user['login_name'], $unregisterUser['username']);
+        $this->assertEquals($user['login_name'], $unregisterUser['nickname']);
+        $this->assertEmpty($unregisterUser['email']);
+        $this->assertEmpty($unregisterUser['mobile']);
     }
 
     protected function mockUser()
