@@ -16,12 +16,14 @@ class BizUser extends Migration
         $connection->exec("
           CREATE TABLE IF NOT EXISTS `biz_security_user` (
             `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
-            `username` VARCHAR(64) NOT NULL COMMENT '用户名',
+            `username` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '用户名',
             `email` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '邮箱',
             `mobile` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '手机号码',
             `nickname` VARCHAR(64) NOT NULL COMMENT '昵称',
             `password` VARCHAR(256) NOT NULL COMMENT '加密后的密码',
             `salt` VARCHAR(64) NOT NULL COMMENT '密码盐',
+            `org_id` INT(10) unsigned NOT NULL DEFAULT 0 COMMENT '所属组织机构id',
+            `org_internal_code` VARCHAR(256) NOT NULL DEFAULT '' COMMENT '所属组织机构内置码',
             `username_verified` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已经验证用户名',
             `email_verified` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已经验证邮箱',
             `mobile_verified` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已经验证手机',

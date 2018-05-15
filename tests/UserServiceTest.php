@@ -256,11 +256,15 @@ class UserServiceTest extends IntegrationTestCase
 
     protected function mockUser()
     {
+        $org = $this->mockOrg();
+        $savedOrg = $this->getOrgService()->createOrg($org);
+
         return array(
             'login_name' => 'test',
             'password' => '123456',
             'created_source' => 'web',
-            'created_ip' => '127.0.0.1'
+            'created_ip' => '127.0.0.1',
+            'org_id' => $savedOrg['id']
         );
     }
 
@@ -270,6 +274,14 @@ class UserServiceTest extends IntegrationTestCase
             'code' => 'Admin',
             'name' => '超级管理员',
             'data' => array('org:manage')
+        );
+    }
+
+    protected function mockOrg()
+    {
+        return array(
+            'name' => '开发组',
+            'code' => 'developer',
         );
     }
 
@@ -284,6 +296,11 @@ class UserServiceTest extends IntegrationTestCase
     protected function getRoleService()
     {
         return $this->biz->service('Role:RoleService');
+    }
+
+    protected function getOrgService()
+    {
+        return $this->biz->service('Org:OrgService');
     }
 
     protected function getUserBindDao()

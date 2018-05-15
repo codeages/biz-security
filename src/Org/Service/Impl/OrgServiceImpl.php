@@ -10,15 +10,26 @@ class OrgServiceImpl extends BaseService implements OrgService
 {
     public function createOrg($org)
     {
-        $org = ArrayToolkit::parts($org, array('name', 'code'));
+        $org = ArrayToolkit::parts($org, array('name', 'code', 'parent_id'));
         if (!ArrayToolkit::requireds($org, array('name', 'code'))) {
             throw $this->createInvalidArgumentException('args is invalid.');
         }
-        return $this->getOrgDao()->create($org);
+
+        $savedOrg = $this->getOrgDao()->create($org);
+        $internalCode = $savedOrg['id'].'.';
+        if (!empty($savedOrg['parent_id'])) {
+            $parentOrg = $this->getOrg($savedOrg['parent_id']);
+            $internalCode = $parentOrg['internal_code'].$internalCode;
+        }
+
+        return $this->getOrgDao()->update($savedOrg['id'], array(
+            'internal_code' => $internalCode
+        ));
     }
 
     public function updateOrg($id, $org)
     {
+        unset($org['parent_id']);
         return $this->getOrgDao()->update($id, $org);
     }
 

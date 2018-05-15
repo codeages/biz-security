@@ -12,7 +12,7 @@ class UserServiceImpl extends BaseService implements UserService
     public function register($user)
     {
         $userFields = array('login_name', 'password', 'created_ip', 'created_source');
-        $unregistedUser = ArrayToolkit::parts($user, $userFields);
+        $unregistedUser = ArrayToolkit::parts($user, array_merge($userFields, array('org_id')));
 
         if (!ArrayToolkit::requireds($unregistedUser, $userFields)) {
             throw $this->createInvalidArgumentException('user args is invalid.');
@@ -34,6 +34,7 @@ class UserServiceImpl extends BaseService implements UserService
 
             $unregistedUser = $this->fillPassword($unregistedUser);
             $unregistedUser = $this->fillLoginName($unregistedUser);
+            $unregistedUser = $this->fillOrg($unregistedUser);
 
             $registedUser = $this->getUserDao()->create($unregistedUser);
             
@@ -101,6 +102,17 @@ class UserServiceImpl extends BaseService implements UserService
         return $unregistedUser;
     }
 
+    protected function fillOrg($unregistedUser)
+    {
+        if (empty($unregistedUser['org_id'])) {
+            return $unregistedUser;
+        }
+
+        $org = $this->getOrgService()->getOrg($unregistedUser['org_id']);
+        $unregistedUser['org_internal_code'] = $org['internal_code'];
+        return $unregistedUser;
+    }
+
     protected function getRegisterStrategy()
     {
         $userOptions = $this->biz['user.options.final'];
@@ -162,12 +174,12 @@ class UserServiceImpl extends BaseService implements UserService
     {
         $existUser = $this->getRegisterStrategy()->loadUserByLoginName($loginName);
         if (empty($existUser)) {
-            throw $this->createInvalidArgumentException('user is exist.');
+            throw $this->createInvalidArgumentException('user is not exist.');
         }
 
         $password = $this->getPasswordEncoder()->encodePassword($password, $existUser['salt']);
         if ($existUser['password'] != $password) {
-            throw $this->createInvalidArgumentException('user is exist.');
+            throw $this->createInvalidArgumentException('user is not exist.');
         }
 
         $wrappedUser = $this->wrapUser($existUser);
@@ -372,5 +384,10 @@ class UserServiceImpl extends BaseService implements UserService
     protected function getRoleService()
     {
         return $this->biz->service('Role:RoleService');
+    }
+
+    protected function getOrgService()
+    {
+        return $this->biz->service('Org:OrgService');
     }
 }
